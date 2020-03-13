@@ -1,7 +1,7 @@
 import XCTest
 
-import nucleus_swiftTests
+import NucleusSwiftTests
 
 var tests = [XCTestCaseEntry]()
-tests += nucleus_swiftTests.allTests()
+tests += NucleusSwiftTests.allTests()
 XCTMain(tests)
