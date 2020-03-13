@@ -73,7 +73,7 @@ public class NucleusClient {
         }
     }
 
-	init(_ appId: String) {
+	public init(_ appId: String) {
 		self.appId = appId
 
 		let osInfo = ProcessInfo().operatingSystemVersion
@@ -91,7 +91,7 @@ public class NucleusClient {
         self.initStore()
 		// Next open websocket connection
         
-        var timer = Timer.scheduledTimer(timeInterval: TimeInterval(reportInterval), target: self, selector: Selector("reportData"), userInfo: nil, repeats: true)
+        var timer = Timer.scheduledTimer(timeInterval: TimeInterval(reportInterval), target: self, selector: Selector(("reportData")), userInfo: nil, repeats: true)
 
 	}
     
@@ -101,7 +101,7 @@ public class NucleusClient {
         self.log("queue saved")
     }
     
-	func track(name: String, data: [String: Any]? = [:], type: String = "event") {
+	public func track(name: String, data: [String: Any]? = [:], type: String = "event") {
  
 		if trackingOff {
 			return
