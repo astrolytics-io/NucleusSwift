@@ -31,11 +31,11 @@ extension Dictionary {
 
 public class NucleusClient {
 	
-	var appId: String
-	var debug: Bool? = false
-	var autoUserId: Bool?
-	var reportInterval: Int = 10
-	var apiUrl: String = "wss://app.nucleus.sh"
+	public var appId: String
+	public var debug: Bool? = false
+//	public var autoUserId: Bool?
+	public var reportInterval: Int = 10
+	public var apiUrl: String = "wss://app.nucleus.sh"
 
 	var localData: [String: Any] = [:]
 	var trackingOff: Bool = false
@@ -43,35 +43,6 @@ public class NucleusClient {
 //    var sock: Any = nil
     var queue = [[String: Any]]()
     var queueUrl = URL(string: "/")
-    
-    func initStore() {
-        do {
-            let fileManager = FileManager.default
-            let fileName = self.appId+".plist"
-            let appSupportUrl = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            
-            let directoryURL = appSupportUrl!.appendingPathComponent("sh.nucleus.swift")
-            try fileManager.createDirectory (at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-        
-            self.queueUrl = directoryURL.appendingPathComponent(fileName)
-            
-            self.queue = NSKeyedUnarchiver.unarchiveObject(withFile: self.queueUrl!.path) as? [[String: Any]] ?? []
-            
-        //if (fileManager.fileExists(atPath: self.queueUrl!.path)) {
-          //  self.log("temp data detected, loading from file")
-           //self.queue = NSArray(contentsOf: self.queueUrl!) as [[String: Any]]
-        //} else {
-          //  self.log("No doc detected")
-            
-          //  document.write (to: self.queueUrl, ofType: "sh.nucleus.swift")
-        //}
-            
-        }
-        
-        catch {
-          print("An error occured")
-        }
-    }
 
 	public init(_ appId: String) {
 		self.appId = appId
@@ -94,12 +65,6 @@ public class NucleusClient {
         var timer = Timer.scheduledTimer(timeInterval: TimeInterval(reportInterval), target: self, selector: Selector(("reportData")), userInfo: nil, repeats: true)
 
 	}
-    
-    func saveQueue() {
-        self.log("saving queue")
-        NSKeyedArchiver.archiveRootObject(queue, toFile: self.queueUrl!.path)
-        self.log("queue saved")
-    }
     
 	public func track(name: String, data: [String: Any]? = [:], type: String = "event") {
  
@@ -151,38 +116,26 @@ public class NucleusClient {
         // Save to Userdefaults/Core Data
 	}
 
-	func trackError(error: Error) {
+	public func trackError(error: Error) {
         // Deep shit here
 	}
 
-	func log(_ message: String) {
-		if (self.debug == true) {
-			print("nucleus: "+message)
-		}
-	}
-
-	func logError(_ message: String) {
-		if (self.debug == true) {
-			print("nucleus error: "+message)
-		}
-	}
-
-	func appStarted() {
+	public func appStarted() {
 		self.track(name: "init")
 	}
 
-	func setUserId(id: String) {
+	public func setUserId(id: String) {
 		self.localData["user_id"] = id
 		self.log("user id set to " + id)
 		self.track(name: "userid")
 	}
     
-    func disableTracking() {
+    public func disableTracking() {
         self.trackingOff = true
         self.log("tracking disabled")
     }
     
-    func enableTracking() {
+    public func enableTracking() {
         self.trackingOff = false
         self.log("tracking enabled")
     }
@@ -230,6 +183,53 @@ public class NucleusClient {
 		}
 
 	}
+    
+    func initStore() {
+        do {
+            let fileManager = FileManager.default
+            let fileName = self.appId+".plist"
+            let appSupportUrl = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            
+            let directoryURL = appSupportUrl!.appendingPathComponent("sh.nucleus.swift")
+            try fileManager.createDirectory (at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+        
+            self.queueUrl = directoryURL.appendingPathComponent(fileName)
+            
+            self.queue = NSKeyedUnarchiver.unarchiveObject(withFile: self.queueUrl!.path) as? [[String: Any]] ?? []
+            
+        //if (fileManager.fileExists(atPath: self.queueUrl!.path)) {
+          //  self.log("temp data detected, loading from file")
+           //self.queue = NSArray(contentsOf: self.queueUrl!) as [[String: Any]]
+        //} else {
+          //  self.log("No doc detected")
+            
+          //  document.write (to: self.queueUrl, ofType: "sh.nucleus.swift")
+        //}
+            
+        }
+        
+        catch {
+          print("An error occured")
+        }
+    }
+    
+    func saveQueue() {
+        self.log("saving queue")
+        NSKeyedArchiver.archiveRootObject(queue, toFile: self.queueUrl!.path)
+        self.log("queue saved")
+    }
+    
+    func log(_ message: String) {
+        if (self.debug == true) {
+            print("nucleus: "+message)
+        }
+    }
+
+    func logError(_ message: String) {
+        if (self.debug == true) {
+            print("nucleus error: "+message)
+        }
+    }
 } 
 
 //NSSetUncaughtExceptionHandler { (exception) in
