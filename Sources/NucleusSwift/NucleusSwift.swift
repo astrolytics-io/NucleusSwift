@@ -190,10 +190,9 @@ public class NucleusClient {
         
         self.log("saving queue")
         NSKeyedArchiver.archiveRootObject(jsonEncoded, toFile: self.queueUrl!.path)
-        
         self.log("queue saved")
         
-        let request = URLRequest(url: URL(string: self.apiUrl)!)
+        let request = URLRequest(url: URL(string: self.apiUrl + "/" + self.appId + "/track" )!)
 
         if (self.isConnected) {
             self.sock!.write(data: jsonEncoded)
