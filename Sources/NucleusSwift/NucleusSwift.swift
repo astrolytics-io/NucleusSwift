@@ -75,7 +75,7 @@ public class NucleusClient {
     // Editable options
 	public var appId: String
 	public var debug: Bool? = false
-	public var reportInterval: Int = 10
+	public var reportInterval: Int = 20
 	public var apiUrl: String = "wss://app.nucleus.sh"
 
     // Internal variables
@@ -83,6 +83,7 @@ public class NucleusClient {
 	var trackingOff = false
 	var isConnected = false
     var sock: WebSocket?
+    var websocket: WebSocketDelegate?
     var queue: [Event] = []
     var queueUrl = URL(string: "/")
 
@@ -180,7 +181,7 @@ public class NucleusClient {
     }
 
     // This only runs at regular interval to save battery
-	func reportData() {
+	public func reportData() {
 
         // Encode to JSON for file saving & ws communication
         
@@ -200,8 +201,7 @@ public class NucleusClient {
             
             let request = URLRequest(url: URL(string: self.apiUrl + "/" + self.appId + "/track" )!)
             self.sock = WebSocket(request: request)
-//            socket.delegate = self
-            self.sock!.connect()
+            self.sock!.delegate = self.websocket
 		
             self.sock!.onEvent = { event in
 			 	switch event {
@@ -231,6 +231,8 @@ public class NucleusClient {
                         self.logError("Error with ws: \(String(describing: error))?")
 			 	}
 			 }
+            
+            self.sock!.connect()
 		}
 
 	}
