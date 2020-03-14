@@ -15,7 +15,6 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0"),
-        .package(url: "https://github.com/onmyway133/EasyStash", from: "1.1.1"),
         .package(url: "https://github.com/yonaskolb/Codability.git", from: "0.2.1")
     ],
     targets: [
@@ -23,7 +22,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "NucleusSwift",
-            dependencies: ["Starscream", "EasyStash", "Codability"]),
+            dependencies: ["Starscream", "Codability"]),
         .testTarget(
             name: "NucleusSwiftTests",
             dependencies: ["NucleusSwift"]),

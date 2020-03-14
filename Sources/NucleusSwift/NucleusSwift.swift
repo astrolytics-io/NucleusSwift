@@ -249,11 +249,12 @@ public class NucleusClient {
         
             self.queueUrl = directoryURL.appendingPathComponent(fileName)
             
-            let jsonData = NSKeyedUnarchiver.unarchiveObject(withFile: self.queueUrl!.path) // as? String ?? ""
-            
-            let decoder = JSONDecoder()
-            self.queue = try! decoder.decode([Event].self, from: jsonData as! Data)
-
+            if fileManager.fileExists(atPath: self.queueUrl!.path) {
+                let jsonData = NSKeyedUnarchiver.unarchiveObject(withFile: self.queueUrl!.path) // as? String ?? ""
+                
+                let decoder = JSONDecoder()
+                self.queue = (jsonData != nil) ? try! decoder.decode([Event].self, from: jsonData as! Data) : [Event]()
+            }
         } catch {
             // error
             print("Fail extracting")
