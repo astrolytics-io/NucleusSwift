@@ -3,6 +3,9 @@ import XCTest
 
 final class NucleusSwiftTests: XCTestCase {
     func testExample() {
+        
+        print("Running test")
+        
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
@@ -13,11 +16,23 @@ final class NucleusSwiftTests: XCTestCase {
         
         Nucleus.track(name: "ACTION1")
         
-        print("running test")
-        
 //        XCTAssertEqual(Nucleus.appId, "test4")
         
-        sleep(20)
+        // Semaphore for not quitting before first data reporting
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        let secondsToDelay = 25.0
+        
+
+//        semaphore.wait()
+        
+    
+//        _ = Timer.scheduledTimer(withTimeInterval: secondsToDelay, repeats: false) { (timer) in
+//            print("delayed message")
+//            semaphore.signal()
+//        }
+
+//        semaphore.wait()
         
     }
 

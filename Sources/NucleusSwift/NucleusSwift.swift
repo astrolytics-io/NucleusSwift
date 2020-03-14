@@ -190,16 +190,15 @@ public class NucleusClient {
         
         self.log("saving queue")
         NSKeyedArchiver.archiveRootObject(jsonEncoded, toFile: self.queueUrl!.path)
-        self.log("queue saved")
         
-        let request = URLRequest(url: URL(string: self.apiUrl + "/" + self.appId + "/track" )!)
-
         if (self.isConnected) {
-            self.sock!.write(data: jsonEncoded)
+//            self.sock!.write(data: jsonEncoded)
             
             // Send heartbeat if queue empty
         } else {
             self.log("Opening websocket connection")
+            
+            let request = URLRequest(url: URL(string: self.apiUrl + "/" + self.appId + "/track" )!)
             self.sock = WebSocket(request: request)
 //            socket.delegate = self
             self.sock!.connect()
@@ -209,7 +208,7 @@ public class NucleusClient {
 			 		case .connected(let headers):
 			 			self.isConnected = true
 			 			self.log("websocket is connected: \(headers)")
-                        self.sock!.write(data: jsonEncoded)
+//                        self.sock!.write(data: jsonEncoded)
 			 		case .disconnected(let reason, let code):
 			 			self.isConnected = false
 			 			self.logError("websocket is disconnected: \(reason) with code: \(code)")
