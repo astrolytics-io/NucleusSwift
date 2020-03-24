@@ -19,10 +19,10 @@ final class NucleusSwiftTests: XCTestCase {
 //        XCTAssertEqual(Nucleus.appId, "test4")
         
         // Semaphore for not quitting before first data reporting
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        let secondsToDelay = 25.0
-        
+//        let semaphore = DispatchSemaphore(value: 0)
+//
+//        let secondsToDelay = 25.0
+//
 
 //        semaphore.wait()
         

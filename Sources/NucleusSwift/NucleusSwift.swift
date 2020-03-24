@@ -199,7 +199,7 @@ public class NucleusClient {
         } else {
             self.log("Opening websocket connection")
             
-            let request = URLRequest(url: URL(string: self.apiUrl + "/" + self.appId + "/track" )!)
+            let request = URLRequest(url: URL(string: self.apiUrl + "/app/" + self.appId + "/track" )!)
             self.sock = WebSocket(request: request)
             self.sock!.delegate = self.websocket
 		
