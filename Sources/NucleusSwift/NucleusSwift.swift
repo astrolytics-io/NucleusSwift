@@ -28,14 +28,14 @@ extension Dictionary {
 
 
 struct Event: Codable {
-    var id: Int
-    var date: Date
+    var id: Int?
+    var date: Date?
     var type: String
     var name: String?
-    var appId: String
+    var appId: String?
     var machineId: String?
-    var sessionId: Int
-    // Next is optional data, omitted to save bandwidth
+    var sessionId: Int?
+    // Next is often omitted to save bandwidth
     var userId: String?
     var payload: [String:AnyCodable]?
     var client: String?
@@ -180,8 +180,36 @@ public class NucleusClient {
         self.log("tracking enabled")
     }
 
+    func sendQueue() {
+        
+        if (!self.isConnected || self.sock == nil) {
+            return
+        }
+        
+        var toSend: [Event]
+        
+        if self.queue.isEmpty == false {
+            toSend = self.queue
+            
+        } else {
+            let heartbeat = Event(
+                type: "heartbeat",
+                machineId: self.machineId
+            )
+            
+            toSend = [heartbeat]
+        }
+        
+        let encoder = JSONEncoder()
+        let jsonEncoded = try! encoder.encode(toSend)
+                   
+        self.sock!.write(data: jsonEncoded)
+        
+       
+    }
+    
     // This only runs at regular interval to save battery
-	public func reportData() {
+    func reportData() {
 
         // Encode to JSON for file saving & ws communication
         
@@ -193,9 +221,7 @@ public class NucleusClient {
         NSKeyedArchiver.archiveRootObject(jsonEncoded, toFile: self.queueUrl!.path)
         
         if (self.isConnected) {
-//            self.sock!.write(data: jsonEncoded)
-            
-            // Send heartbeat if queue empty
+            self.sendQueue()
         } else {
             self.log("Opening websocket connection")
             
@@ -208,7 +234,7 @@ public class NucleusClient {
 			 		case .connected(let headers):
 			 			self.isConnected = true
 			 			self.log("websocket is connected: \(headers)")
-//                        self.sock!.write(data: jsonEncoded)
+                        self.sendQueue()
 			 		case .disconnected(let reason, let code):
 			 			self.isConnected = false
 			 			self.logError("websocket is disconnected: \(reason) with code: \(code)")
