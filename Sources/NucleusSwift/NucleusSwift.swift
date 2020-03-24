@@ -218,7 +218,10 @@ public class NucleusClient {
         let decoder = JSONDecoder()
         let parsed = try! decoder.decode([String:[Int]].self, from: data)
         
+        print(parsed)
+        
         self.queue = self.queue.filter { !(parsed["reportedIds"]?.contains($0.id!))! }
+    
     }
     
     // This only runs at regular interval to save battery
