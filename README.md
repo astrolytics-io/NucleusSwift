@@ -20,3 +20,14 @@ and to your application/library target, add "NucleusSwift" to your dependencies,
 ```swift
 .target(name: "BestExampleApp", dependencies: ["NucleusSwift"]),
 ```
+
+###
+
+```swift
+import NucleusSwift
+
+Nucleus.shared.setup("5e6d0f14341df6a7e35d5859")
+Nucleus.shared.appStarted()
+
+Nucleus.shared.track("BTN-CLICKED")
+```

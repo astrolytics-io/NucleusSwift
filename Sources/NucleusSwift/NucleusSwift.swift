@@ -71,20 +71,36 @@ var osVersionNumber: String {
 }
 
 public class NucleusClient {
+    
+    // For singleton
+    static let shared = NucleusClient()
 	
-    // Editable options
-	public var appId: String
+    // App Id obtained on nucleus.sh
+	public var appId: String?
+    
+    // Enabel logging for debugging
 	public var debug: Bool? = false
+    
+    // How often (in s) should the data be reported)
 	public var reportInterval: Int = 20
+    
+    // The tracking endpoint
 	public var apiUrl: String = "wss://app.nucleus.sh"
-
-    // Internal variables
-	var localData: [String: AnyCodable] = [:]
+    
+    // Disable tracking per user' request
 	var trackingOff = false
+    
+    // Are we connected to the websocket server
 	var isConnected = false
+    
+    // Global ws object
     var sock: WebSocket?
     var websocket: WebSocketDelegate?
+    
+    // In memory queue of enqueued events
     var queue: [Event] = []
+    
+    // Where the queue will be cached
     var queueUrl = URL(string: "/")
 
     // Analytics data
@@ -95,10 +111,15 @@ public class NucleusClient {
     let machineId: String? = serialNumber
     let totalRam: Double = Double(ProcessInfo().physicalMemory) / pow( 1024,  3)
     public var appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-    var sessionId: Int
+    
+    var sessionId: Int?
     public var userId: String?
     
-	public init(_ appId: String) {
+    private init() {
+        
+    }
+    
+	public func setup(_ appId: String) {
 		self.appId = appId
 		// Find the analytics data
 		self.sessionId = Int(arc4random_uniform(10000) + 1)
@@ -144,15 +165,12 @@ public class NucleusClient {
             event.totalRam = self.totalRam
             event.version = self.appVersion
             event.locale = self.locale
-//                event.arch": self.localData['arch'],
             event.moduleVersion = self.moduleVersion
 		}
         
         queue.append(event)
         
         self.log("queue is now "+String(queue.count))
-
-        // Save to Userdefaults/Core Data
 	}
 
 	public func trackError(error: Error) {
@@ -218,10 +236,7 @@ public class NucleusClient {
         let decoder = JSONDecoder()
         let parsed = try! decoder.decode([String:[Int]].self, from: data)
         
-        print(parsed)
-        
         self.queue = self.queue.filter { !(parsed["reportedIds"]?.contains($0.id!))! }
-    
     }
     
     // This only runs at regular interval to save battery
@@ -241,7 +256,7 @@ public class NucleusClient {
         } else {
             self.log("Opening websocket connection")
             
-            let request = URLRequest(url: URL(string: self.apiUrl + "/app/" + self.appId + "/track" )!)
+            let request = URLRequest(url: URL(string: self.apiUrl + "/app/" + self.appId! + "/track" )!)
             self.sock = WebSocket(request: request)
             self.sock!.delegate = self.websocket
 		
@@ -253,9 +268,9 @@ public class NucleusClient {
                         self.sendQueue()
 			 		case .disconnected(let reason, let code):
 			 			self.isConnected = false
-			 			self.logError("websocket is disconnected: \(reason) with code: \(code)")
+			 			self.log("websocket is disconnected: \(reason) with code: \(code)")
 			 		case .text(let string):
-			 			self.log("Received text: \(string)")
+			 			self.log("Received message from server: \(string)")
                         self.handleMessage(message: string)
 			 		case .binary(let data):
 			 			self.log("Received data: \(data.count)")
@@ -284,7 +299,7 @@ public class NucleusClient {
         
         do {
             let fileManager = FileManager.default
-            let fileName = self.appId+".plist"
+            let fileName = self.appId!+".plist"
             let appSupportUrl = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             
             let directoryURL = appSupportUrl!.appendingPathComponent("sh.nucleus.swift")
