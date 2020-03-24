@@ -70,7 +70,7 @@ var osVersionNumber: String {
     return String(osInfo.majorVersion) + "." + String(osInfo.minorVersion)
 }
 
-public class NucleusClient {
+public class Nucleus {
     
     // For singleton
     static let shared = NucleusClient()
