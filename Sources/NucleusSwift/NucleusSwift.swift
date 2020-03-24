@@ -256,7 +256,7 @@ public class NucleusClient {
 			 			self.logError("websocket is disconnected: \(reason) with code: \(code)")
 			 		case .text(let string):
 			 			self.log("Received text: \(string)")
-                        handleMessage(message: string)
+                        self.handleMessage(message: string)
 			 		case .binary(let data):
 			 			self.log("Received data: \(data.count)")
 			 		case .ping(_):
