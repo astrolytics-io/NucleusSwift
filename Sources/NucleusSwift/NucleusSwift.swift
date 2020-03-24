@@ -212,6 +212,15 @@ public class NucleusClient {
         self.sock!.write(data: jsonEncoded)
     }
     
+    func handleMessage(message: String) {
+        let data = Data(message.utf8)
+        
+        let decoder = JSONDecoder()
+        let parsed = try! decoder.decode([String:[Int]].self, from: data)
+        
+        self.queue = self.queue.filter { !(parsed["reportedIds"]?.contains($0.id!))! }
+    }
+    
     // This only runs at regular interval to save battery
     func reportData() {
 
@@ -244,6 +253,7 @@ public class NucleusClient {
 			 			self.logError("websocket is disconnected: \(reason) with code: \(code)")
 			 		case .text(let string):
 			 			self.log("Received text: \(string)")
+                        
 			 		case .binary(let data):
 			 			self.log("Received data: \(data.count)")
 			 		case .ping(_):
