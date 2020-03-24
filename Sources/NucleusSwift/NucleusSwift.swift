@@ -199,13 +199,17 @@ public class NucleusClient {
             
             toSend = [heartbeat]
         }
+    
+        let json: [String: [Event]] = [
+            "data": toSend
+        ]
         
         let encoder = JSONEncoder()
-        let jsonEncoded = try! encoder.encode(toSend)
-                   
+        encoder.dateEncodingStrategy = .millisecondsSince1970
+        let jsonEncoded = try! encoder.encode(json)
+
+        self.log("sending data to server")
         self.sock!.write(data: jsonEncoded)
-        
-       
     }
     
     // This only runs at regular interval to save battery
