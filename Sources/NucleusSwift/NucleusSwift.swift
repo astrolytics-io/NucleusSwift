@@ -3,6 +3,8 @@ import Starscream
 import Foundation
 import Codability
 
+// serialNumber only works on MacOS. This needs to be extended to support all
+// Swift fallback to https://developer.apple.com/documentation/uikit/uidevice/1620059-identifierforvendor
 var serialNumber: String? {
 	let platformExpert = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice") )
 	
@@ -17,15 +19,6 @@ var serialNumber: String? {
 	IOObjectRelease(platformExpert)
 	return serialNumber
 }
-
-extension Dictionary {
-    mutating func merge(dict: [Key: Value]){
-        for (k, v) in dict {
-            updateValue(v, forKey: k)
-        }
-    }
-}
-
 
 struct Event: Codable {
     var id: Int?
@@ -73,7 +66,7 @@ var osVersionNumber: String {
 public class Nucleus {
     
     // For singleton
-    static let shared = NucleusClient()
+    static let shared = Nucleus()
 	
     // App Id obtained on nucleus.sh
 	public var appId: String?
@@ -124,17 +117,18 @@ public class Nucleus {
 		// Find the analytics data
 		self.sessionId = Int(arc4random_uniform(10000) + 1)
 
-        // Set up cache storing
+        // Read queue from file
         self.initStore()
 
-        let timer = Timer.scheduledTimer(timeInterval: TimeInterval(reportInterval), target: self, selector: #selector(fireTimer), userInfo: nil, repeats: true)
+        // Report data automatically at set interval
+        Timer.scheduledTimer(timeInterval: TimeInterval(reportInterval), target: self, selector: #selector(fireTimer), userInfo: nil, repeats: true)
 	}
     
     @objc func fireTimer() {
         self.reportData()
     }
     
-    public func track(name: String? = nil, data: [String: AnyCodable]? = nil, type: String = "event") {
+    public func track(name: String? = nil, data: [String: Any]? = nil, type: String = "event") {
  
 		if trackingOff {
 			return
@@ -154,12 +148,12 @@ public class Nucleus {
             machineId: self.machineId,
             sessionId: self.sessionId,
             userId: self.userId,
-            payload: data
+            payload: data as? [String: AnyCodable]? ?? nil
         )
 
         // Only for these events to save bandwidth
 		if type == "init" || type == "error" {
-            event.client = "cocoa"
+            event.client = "swift"
             event.platform = self.platform
             event.osVersion = self.osVersion
             event.totalRam = self.totalRam
@@ -173,10 +167,19 @@ public class Nucleus {
         self.log("queue is now "+String(queue.count))
 	}
 
-	public func trackError(error: Error) {
+    public func trackError(id: String, message: String) {
         // Deep shit here
+        let trace = Thread.callStackSymbols.joined(separator: "\n")
+        
+        let data: [String: String]? = [
+            "message": message,
+            "stack": trace
+        ]
+        
+        self.track(name: id, data: data, type: "error")
 	}
 
+    // First method to call after setup
 	public func appStarted() {
 		self.track(type: "init")
         self.reportData()
@@ -230,6 +233,9 @@ public class Nucleus {
         self.sock!.write(data: jsonEncoded)
     }
     
+    // This handle messaged received from server
+    // message contains a list of IDs for events that were just reported
+    // this removes successfully reported events from the queue
     func handleMessage(message: String) {
         let data = Data(message.utf8)
         
@@ -239,16 +245,12 @@ public class Nucleus {
         self.queue = self.queue.filter { !(parsed["reportedIds"]?.contains($0.id!))! }
     }
     
-    // This only runs at regular interval to save battery
+    // This only runs at regular interval to save battery & bandwidth
     func reportData() {
 
-        // Encode to JSON for file saving & ws communication
-        
+        // Encode to JSON for saving to file
         let encoder = JSONEncoder()
         let jsonEncoded = try! encoder.encode(self.queue)
-//        print(String(data: data, encoding: .utf8)!)
-        
-        self.log("saving queue")
         NSKeyedArchiver.archiveRootObject(jsonEncoded, toFile: self.queueUrl!.path)
         
         if (self.isConnected) {
@@ -330,11 +332,5 @@ public class Nucleus {
             print("nucleus error: "+message)
         }
     }
-} 
+}
 
-//NSSetUncaughtExceptionHandler { (exception) in
-//    let stack = exception.callStackReturnAddresses
-//    print("Stack trace: \(stack)")
-//}
-
-// NSException(name: "SomeName", reason: "SomeReason", userInfo: nil).raise()

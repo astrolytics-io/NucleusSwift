@@ -9,14 +9,17 @@ final class NucleusSwiftTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        let Nucleus = NucleusClient.shared
         
-        Nucleus.setup("5e6d0f14341df6a7e35d5859")
-        Nucleus.debug = true
-        Nucleus.apiUrl = "ws://localhost:5000"
-        Nucleus.appStarted()
+        Nucleus.shared.setup("5e6d0f14341df6a7e35d5859")
+        Nucleus.shared.debug = true
+        Nucleus.shared.apiUrl = "ws://localhost:5000"
+        Nucleus.shared.appStarted()
         
-        Nucleus.track(name: "ACTION1")
+        Nucleus.shared.track(name: "ACTION1")
+        
+//        print(Thread.callStack)
+        
+
         
 //        XCTAssertEqual(Nucleus.appId, "test4")
         
