@@ -130,9 +130,7 @@ public class Nucleus {
     
     public func track(name: String? = nil, data: [String: Any]? = nil, type: String = "event") {
  
-		if trackingOff {
-			return
-		}
+		if trackingOff { return }
 
         self.log("reporting event "+(name ?? type) )
 
@@ -148,7 +146,7 @@ public class Nucleus {
             machineId: self.machineId,
             sessionId: self.sessionId,
             userId: self.userId,
-            payload: data as? [String: AnyCodable]? ?? nil
+            payload: data as! [String: AnyCodable]?
         )
 
         // Only for these events to save bandwidth
@@ -185,9 +183,9 @@ public class Nucleus {
         self.reportData()
 	}
 
-	public func setUserId(id: String?) {
+	public func setUserId(_ id: String) {
 		self.userId = id
-        self.log("user id set to " + id!)
+        self.log("user id set to " + id)
 		self.track(type: "userid")
 	}
     
@@ -203,9 +201,7 @@ public class Nucleus {
 
     func sendQueue() {
         
-        if (!self.isConnected || self.sock == nil) {
-            return
-        }
+        if (!self.isConnected || self.sock == nil) { return }
         
         var toSend: [Event]
         
@@ -221,9 +217,7 @@ public class Nucleus {
             toSend = [heartbeat]
         }
     
-        let json: [String: [Event]] = [
-            "data": toSend
-        ]
+        let json: [String: [Event]] = [ "data": toSend ]
         
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .millisecondsSince1970
