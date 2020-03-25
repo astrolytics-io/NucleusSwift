@@ -66,7 +66,7 @@ var osVersionNumber: String {
 public class Nucleus {
     
     // For singleton
-    static let shared = Nucleus()
+    public static let shared = Nucleus()
 	
     // App Id obtained on nucleus.sh
 	public var appId: String?
