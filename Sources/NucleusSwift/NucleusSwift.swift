@@ -30,7 +30,7 @@ struct Event: Codable {
     var sessionId: Int?
     // Next is often omitted to save bandwidth
     var userId: String?
-    var payload: [String:AnyCodable]?
+    var payload: [String: Any]
     var client: String?
     var platform: String?
     var osVersion: String?
@@ -40,6 +40,8 @@ struct Event: Codable {
     var arch: String?
     var moduleVersion: String?
 }
+
+typealias EventQueue = [Event]
 
 
 var platformName: String {
@@ -91,7 +93,7 @@ public class Nucleus {
     var websocket: WebSocketDelegate?
     
     // In memory queue of enqueued events
-    var queue: [Event] = []
+    var queue: EventQueue = []
     
     // Where the queue will be cached
     var queueUrl = URL(string: "/")
@@ -128,7 +130,7 @@ public class Nucleus {
         self.reportData()
     }
     
-    public func track(name: String? = nil, data: [String: Any]? = nil, type: String = "event") {
+    public func track(name: String? = nil, data: NSMutableDictionary? = nil, type: String = "event") {
  
 		if trackingOff { return }
 
@@ -146,7 +148,7 @@ public class Nucleus {
             machineId: self.machineId,
             sessionId: self.sessionId,
             userId: self.userId,
-            payload: data as! [String: AnyCodable]?
+            payload: data
         )
 
         // Only for these events to save bandwidth
@@ -160,6 +162,8 @@ public class Nucleus {
             event.moduleVersion = self.moduleVersion
 		}
         
+        print(event)
+        
         queue.append(event)
         
         self.log("queue is now "+String(queue.count))
@@ -169,7 +173,7 @@ public class Nucleus {
         // Deep shit here
         let trace = Thread.callStackSymbols.joined(separator: "\n")
         
-        let data: [String: String]? = [
+        let data = [
             "message": message,
             "stack": trace
         ]
@@ -216,7 +220,7 @@ public class Nucleus {
             
             toSend = [heartbeat]
         }
-    
+        
         let json: [String: [Event]] = [ "data": toSend ]
         
         let encoder = JSONEncoder()
@@ -226,6 +230,7 @@ public class Nucleus {
         self.log("sending data to server")
         self.sock!.write(data: jsonEncoded)
     }
+    
     
     // This handle messaged received from server
     // message contains a list of IDs for events that were just reported
@@ -307,7 +312,7 @@ public class Nucleus {
                 let jsonData = NSKeyedUnarchiver.unarchiveObject(withFile: self.queueUrl!.path) // as? String ?? ""
                 
                 let decoder = JSONDecoder()
-                self.queue = (jsonData != nil) ? try! decoder.decode([Event].self, from: jsonData as! Data) : [Event]()
+                self.queue = (jsonData != nil) ? try! decoder.decode(EventQueue.self, from: jsonData as! Data) : [Event]()
             }
         } catch {
             // error

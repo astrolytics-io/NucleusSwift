@@ -17,6 +17,8 @@ final class NucleusSwiftTests: XCTestCase {
         
         Nucleus.shared.track(name: "ACTION1")
         
+        Nucleus.shared.trackError(id: "ERROR1", message: "Unknown request")
+        
 //        print(Thread.callStack)
         
 
