@@ -1,13 +1,14 @@
 # NucleusSwift
 
+*This module is in beta. Send us an email in case of any integration issue.*
+
 Analytics, licensing and bug reports for Swift MacOS applications.
 
 We made it as simple as possible to report the data you need to analyze your app and improve it.
 
-To start using this package, sign up and get an app ID on [Nucleus.sh](https://nucleus.sh). 
+To start using this package, sign up and get an app tracking ID on [Nucleus.sh](https://nucleus.sh). 
 
-
-* Make sure to check enable both "Incoming and outgoing connections" for your app in XCode under "Signing & Capabilities" * 
+*Make sure to check enable both "Incoming and outgoing connections" for your app in XCode under "Signing & Capabilities"* 
 
 If you have a server-side Swift application, or maybe a cross-platform (for example Linux & macOS) app/library, and you would like to log, we think targeting this logging API package is a great idea. Below you'll find all you need to know to get started.
 
